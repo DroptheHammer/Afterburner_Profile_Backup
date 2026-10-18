@@ -127,9 +127,8 @@ class App(tk.Tk):
                  selftest: bool = False):
         super().__init__()
         self.title(APP_NAME)
-        self.minsize(720, 560)
-        self.geometry("900x680")
         w.setup_fonts(self)
+        self._size_for_zoom()
         self.settings = settings.load_settings()
         self.test_run = tk.BooleanVar(self, bool(test_run))
         self.history: list[str] = []
@@ -137,8 +136,9 @@ class App(tk.Tk):
         self.current_name = ""
         self.status = w.StatusBar(self)
         self.status.pack(side="bottom", fill="x")
-        self.screen_area = ttk.Frame(self)
-        self.screen_area.pack(side="top", fill="both", expand=True)
+        self.scroll = w.ScrollArea(self)
+        self.scroll.pack(side="top", fill="both", expand=True)
+        self.screen_area = self.scroll.inner
         self.bind("<Escape>", lambda e: self.go_back() if self.current_name != "home" else None)
         if selftest:
             return
@@ -164,7 +164,17 @@ class App(tk.Tk):
             self.history.append(name)
         self.current = cls(self, **kwargs)
         self.current.pack(fill="both", expand=True)
+        self.scroll.refresh()
+        self.scroll.scroll_to_top()
         self.current.on_show()
+
+    def _size_for_zoom(self) -> None:
+        """Start and minimum size grow with Windows zoom, but never beyond the screen."""
+        zoom = w.zoom_factor(self)
+        max_w = int(self.winfo_screenwidth() * 0.9)
+        max_h = int(self.winfo_screenheight() * 0.85)
+        self.minsize(min(int(720 * zoom), max_w), min(int(560 * zoom), max_h))
+        self.geometry("%dx%d" % (min(int(900 * zoom), max_w), min(int(680 * zoom), max_h)))
 
     def go_back(self) -> None:
         if self.history:

@@ -133,6 +133,12 @@ every commit. See SPEC.md section 12 for the rules. Use placeholder paths
 only, such as `C:\Users\<you>\...`, `\\NAS\share\AfterburnerBackups`, and
 `D:\Backups\Afterburner`.
 
+## Releasing
+
+See [RELEASING.md](RELEASING.md). In short: update `CHANGELOG.md`, run
+`py tools\bump_version.py X.Y.Z`, `build.bat`, `py tools\make_release_notes.py X.Y.Z`,
+then commit, tag `vX.Y.Z`, push, and `gh release create`.
+
 ## License
 
 MIT. Downloads are published on the project's GitHub Releases page

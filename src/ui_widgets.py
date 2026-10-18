@@ -95,6 +95,116 @@ class StatusBar(ttk.Frame):
         return self._text.get("1.0", "end-1c")
 
 
+def zoom_factor(root: tk.Misc) -> float:
+    """Windows display zoom as a factor (1.0 = 100%, 1.5 = 150%)."""
+    try:
+        return max(1.0, float(root.winfo_fpixels("1i")) / 96.0)
+    except (tk.TclError, ValueError):
+        return 1.0
+
+
+class ScrollArea(ttk.Frame):
+    """Area whose content (self.inner) fills the space, and scrolls only when it doesn't fit.
+
+    Keeps every screen usable at any Windows zoom level or window size."""
+
+    _SELF_SCROLLING = ("Text", "Listbox", "Treeview", "Canvas")
+
+    def __init__(self, parent, **kwargs):
+        super().__init__(parent, **kwargs)
+        bg = ttk.Style(self).lookup("TFrame", "background") or None
+        self.canvas = tk.Canvas(self, highlightthickness=0, borderwidth=0, background=bg,
+                                takefocus=False)
+        self.bar = ttk.Scrollbar(self, orient="vertical", command=self.canvas.yview)
+        self.canvas.configure(yscrollcommand=self.bar.set)
+        self.canvas.pack(side="left", fill="both", expand=True)
+        self.inner = ttk.Frame(self.canvas)
+        self._win = self.canvas.create_window(0, 0, window=self.inner, anchor="nw")
+        self._bar_shown = False
+        self._last = None
+        self.canvas.bind("<Configure>", lambda e: self._fit())
+        # The content's wanted height changes without any event (new screen, re-wrapped
+        # text), so check it a few times a second.
+        self._after_id = self.after(150, self._poll)
+        self.bind("<Destroy>", self._stop, add="+")
+        root = self.winfo_toplevel()
+        root.bind_all("<MouseWheel>", self._wheel, add="+")
+        root.bind_all("<FocusIn>", self._focus, add="+")
+
+    def _stop(self, event) -> None:
+        if event.widget is self and self._after_id:
+            self.after_cancel(self._after_id)
+            self._after_id = None
+
+    def _poll(self) -> None:
+        try:
+            key = (self.inner.winfo_reqheight(), self.canvas.winfo_width(),
+                   self.canvas.winfo_height())
+            if key != self._last:
+                self._fit()
+            self._after_id = self.after(150, self._poll)
+        except tk.TclError:
+            pass  # window closed
+
+    def refresh(self) -> None:
+        """Re-check the content size now (call after replacing the content)."""
+        self.update_idletasks()
+        self._fit()
+
+    def _fit(self) -> None:
+        width, height = self.canvas.winfo_width(), self.canvas.winfo_height()
+        need = self.inner.winfo_reqheight()
+        self._last = (need, width, height)
+        full = max(height, need)
+        self.canvas.itemconfigure(self._win, width=width, height=full)
+        self.canvas.configure(scrollregion=(0, 0, width, full))
+        if need > height + 1 and not self._bar_shown:
+            self.bar.pack(side="right", fill="y", before=self.canvas)
+            self._bar_shown = True
+        elif need <= height and self._bar_shown:
+            self.bar.pack_forget()
+            self._bar_shown = False
+            self.canvas.yview_moveto(0)
+
+    def scroll_to_top(self) -> None:
+        self.canvas.yview_moveto(0)
+
+    def _inside(self, widget) -> bool:
+        while widget is not None:
+            if widget is self.inner:
+                return True
+            widget = getattr(widget, "master", None)
+        return False
+
+    def _wheel(self, event) -> None:
+        widget = event.widget
+        if not self._bar_shown or not isinstance(widget, tk.Misc) or not self._inside(widget):
+            return
+        probe = widget
+        while probe is not None and probe is not self.inner:  # lists scroll themselves
+            if probe.winfo_class() in self._SELF_SCROLLING:
+                return
+            probe = probe.master
+        self.canvas.yview_scroll(-1 if event.delta > 0 else 1, "units")
+
+    def _focus(self, event) -> None:
+        """Scroll so the widget that just got keyboard focus is visible."""
+        widget = event.widget
+        if not self._bar_shown or not isinstance(widget, tk.Misc) or not self._inside(widget):
+            return
+        try:
+            top = widget.winfo_rooty() - self.inner.winfo_rooty()
+            bottom = top + widget.winfo_height()
+            full = max(1, self.inner.winfo_height())
+            view_top, view_bottom = (f * full for f in self.canvas.yview())
+            if top < view_top:
+                self.canvas.yview_moveto(max(0, top - 8) / full)
+            elif bottom > view_bottom:
+                self.canvas.yview_moveto((bottom + 8 - (view_bottom - view_top)) / full)
+        except tk.TclError:
+            pass
+
+
 def run_background(root: tk.Misc, func: Callable[[], Any],
                    on_done: Callable[[Any, Any], None]) -> None:
     """Run func() in a daemon thread; call on_done(result, error) on the Tk thread."""

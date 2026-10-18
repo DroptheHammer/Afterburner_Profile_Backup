@@ -531,8 +531,13 @@ def restore_files(info: BackupInfo, rel_paths: list[str], install_dir: str,
 ### 7.1 Look and accessibility
 
 - Window title: `Afterburner Profile Backup`. Minimum size 720x560, starts at
-  900x680, resizable; content reflows (use `grid`/`pack` with `fill`/`expand`;
-  long text labels use `wraplength` updated on resize).
+  900x680 — both multiplied by the Windows zoom factor (`ui_widgets.zoom_factor`,
+  e.g. 1.5 at 150%) and capped to the screen. Resizable; content reflows (use
+  `grid`/`pack` with `fill`/`expand`; long text labels use `wraplength` updated on resize).
+- Screens live inside `ui_widgets.ScrollArea`: content fills the window and a vertical
+  scrollbar appears only when it doesn't fit; keyboard focus scrolls the focused widget
+  into view. `tests/test_ui_layout.py` checks 100/125/150/200% zoom: Home fits at the start
+  size, and every button on every screen is reachable at the minimum size.
 - Fonts: named fonts created once in `ui_widgets.setup_fonts(root)`:
   `"ABPB.Body"` Segoe UI 12, `"ABPB.Hint"` Segoe UI 10, `"ABPB.Title"` Segoe UI 18 bold,
   `"ABPB.Big"` Segoe UI 16 bold (big buttons). Fall back to TkDefaultFont family
