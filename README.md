@@ -10,7 +10,7 @@ Gamers who tweak their graphics card with MSI Afterburner and do not want to los
 
 ## Download and run in 3 steps
 
-1. Go to the Releases page: https://github.com/DroptheHammer/afterburner-profile-backup/releases and download AfterburnerProfileBackup.exe from the newest release.
+1. Go to the Releases page: https://github.com/DroptheHammer/Afterburner_Profile_Backup/releases and download AfterburnerProfileBackup.exe from the newest release.
 2. Save the file anywhere you like, for example on your desktop. There is nothing to install.
 3. Double-click AfterburnerProfileBackup.exe. The first time, click "Yes, that's right" when it shows your Afterburner profiles.
 

@@ -136,4 +136,4 @@ only, such as `C:\Users\<you>\...`, `\\NAS\share\AfterburnerBackups`, and
 ## License
 
 MIT. Downloads are published on the project's GitHub Releases page
-(`https://github.com/DroptheHammer/afterburner-profile-backup`).
+(`https://github.com/DroptheHammer/Afterburner_Profile_Backup`).
