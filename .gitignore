@@ -1,0 +1,16 @@
+*.cfg
+settings.json
+log.txt
+log.old.txt
+manifest.json
+[0-9][0-9][0-9][0-9]-[0-9][0-9]-*/
+before-restore/
+*.abpb-tmp
+build/
+dist/
+*.spec
+.venv/
+__pycache__/
+*.pyc
+.claude/
+*.log
