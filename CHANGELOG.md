@@ -2,13 +2,13 @@
 
 What changed in each version of Afterburner Profile Backup. Newest first.
 
-## 1.0.1 (not released yet)
+## 1.0.1 (2026-10-18)
 
 ### Fixed
 - The window no longer looks squashed when Windows display zoom is above 100% (for example 125% or 150%). The window now grows with your zoom setting.
 - On small screens, every screen can now scroll, so no button is ever cut off. Pressing Tab scrolls to the button you move to.
 
-## 1.0.0
+## 1.0.0 (2026-10-18)
 
 First release.
 

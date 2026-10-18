@@ -2,7 +2,7 @@
 
 APP_NAME: str = "Afterburner Profile Backup"
 APP_ID: str = "AfterburnerProfileBackup"
-VERSION: str = "1.0.0"
+VERSION: str = "1.0.1"
 LICENSE_NAME: str = "MIT License"
 REPO_URL: str = "https://github.com/DroptheHammer/Afterburner_Profile_Backup"
 DISCLAIMER: str = (
